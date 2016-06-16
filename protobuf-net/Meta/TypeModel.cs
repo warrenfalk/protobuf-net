@@ -787,7 +787,17 @@ namespace ProtoBuf.Meta
             if (listType == model.MapType(typeof(string)) || listType.IsArray
                 || !model.MapType(typeof(IEnumerable)).IsAssignableFrom(listType)) return null;
 #endif
-            
+
+#if !NO_GENERICS
+            foreach (Type iface in listType.GetInterfaces())
+            {
+                if (iface.IsGenericType && iface.GetGenericTypeDefinition() == typeof(System.Collections.Generic.IEnumerable<>))
+                {
+                    return iface.GetGenericArguments()[0];
+                }
+            }
+#endif
+
             BasicList candidates = new BasicList();
 #if WINRT
             foreach (MethodInfo method in listType.GetRuntimeMethods())
